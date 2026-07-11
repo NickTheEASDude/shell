@@ -14,3 +14,4 @@ config.h.in
 stamp-h1
 .libs/
 .deps/
+*~
