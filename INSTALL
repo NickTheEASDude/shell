@@ -1,0 +1,3 @@
+Usually just running the configure script, then running make will do the trick.
+If the configure script doesn't exist, you'll need the autotools to generate it.
+Install the autotools, then run autoreconf -if
