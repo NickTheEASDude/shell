@@ -9,7 +9,9 @@
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>. */
 
 // NOTE: AI was used in part of the writing of this program, however it was only used as a guideline, and most of the code was hand-written.
-#include <config.h>
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 #include <signal.h>
 #include <termios.h>
 #include <unistd.h>
