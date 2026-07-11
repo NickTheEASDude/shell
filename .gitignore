@@ -1,4 +1,6 @@
 configure
+config.guess
+config.sub
 Makefile
 Makefile.in
 autom4te.cache/
