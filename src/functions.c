@@ -40,7 +40,7 @@ void setSignals(void (*sig)(int)) {
 	sigaction(SIGTTOU, &sa, NULL);
 }
 
-void doWait(pid_t child, pid_t parent, struct termios *modes, pid_t *stoppedPID, char *exitStat) {
+void doWait(pid_t child, pid_t parent, struct termios *modes, pid_t *stoppedPID, unsigned char *exitStat) {
 	int status;
 	waitpid(child, &status, WUNTRACED);
 	tcsetpgrp(STDIN_FILENO, parent);
@@ -126,8 +126,14 @@ int parseBuiltins(char *input[], unsigned char *status, pid_list *list) {
 	if (strcmp(input[0], "pwd") == 0) {
 		*status = 0;
 		char *cwd = getcwd(NULL, 0);
+		if (cwd == NULL) {
+			write(STDERR_FILENO, "getcwd malloc failed\n", 21);
+			*status = 1;
+			return 2;
+		}
 		write(STDOUT_FILENO, cwd, strlen(cwd));
 		write(STDOUT_FILENO, "\n", 1);
+		free(cwd);
 		return 2;
 	}
 	if (strcmp(input[0], "pstat") == 0) {
@@ -137,13 +143,14 @@ int parseBuiltins(char *input[], unsigned char *status, pid_list *list) {
 		printStat[3] = '\0';
 		int digit = 2;
 		if (prevStat == 0) {
-			printStat[digit--] = '0';
+			printStat[digit] = '0';
 			goto skip;
 		}
 		for (; prevStat != 0; digit--) {
 			printStat[digit] = (prevStat % 10) + '0';
 			prevStat /= 10;
 		}
+		digit++;
 skip:;		write(STDOUT_FILENO, printStat + digit, 3 - digit);
 		write(STDOUT_FILENO, "\n", 1);
 		return 2;

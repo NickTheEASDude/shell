@@ -21,10 +21,10 @@ You should have received a copy of the GNU General Public License along with thi
 static struct termios parentTmodes;
 static pid_t childStoppedPID = 0;
 
-int main(int argc, char *argv[]) {
+int main() {
 	pid_t parentPID = getpid();
 	setpgid(parentPID, parentPID);
-	tcsetpgrp(parentPID, parentPID);
+	tcsetpgrp(STDIN_FILENO, parentPID);
 	tcgetattr(STDIN_FILENO, &parentTmodes);
 	unsigned char currentStatus = 0;
 	setSignals(SIG_IGN);
@@ -39,6 +39,11 @@ int main(int argc, char *argv[]) {
 		write(STDOUT_FILENO, "# ", 2);
 		char command[4097];
 		ssize_t bytesRead = read(STDIN_FILENO, command, 4096);
+		if (bytesRead < 0) {
+			write(STDERR_FILENO, "read somehow failed, trying again\n", 34);
+			currentStatus = 1;
+			continue;
+		}
 		if (bytesRead == 0)
 			return currentStatus;
 		if (command[bytesRead - 1] == '\n')

@@ -12,9 +12,10 @@ You should have received a copy of the GNU General Public License along with thi
 #ifndef	FUNCTIONS_H
 #define FUNCTIONS_H
 #include <sys/types.h>
+#include <termios.h>
 
 void setSignals(void (*sig)(int));
-void doWait(pid_t child, pid_t parent, struct termios *modes, pid_t *stoppedPID, char *exitStat);
+void doWait(pid_t child, pid_t parent, struct termios *modes, pid_t *stoppedPID, unsigned char *exitStat);
 char **parseArgs(char *input);
 typedef struct {
 	pid_t *parent;
