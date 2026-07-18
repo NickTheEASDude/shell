@@ -20,9 +20,9 @@ You should have received a copy of the GNU General Public License along with thi
 #include <string.h>
 #include "functions.h"
 
-void arrRem(char *arr[], int index) {
+static void arrRem(char *arr[], int index) {
 	int size = 0;
-	for (size = 0; arr[size] != NULL; size++);
+	while (arr[size] != NULL) size++;
 	for (int nextIn = index; nextIn < size; nextIn++) {
 		arr[nextIn] = arr[nextIn + 1];
 	}
@@ -73,11 +73,11 @@ char **parseArgs(char *input) {
 	return args;
 }
 
-int parseBuiltins(char *input[], char *status, pid_list *list) {
+int parseBuiltins(char *input[], unsigned char *status, pid_list *list) {
 	if (strcmp(input[0], "exit") == 0) {
 		if (input[1] != NULL) {
 			char *checkLen;
-			long newStatus = strtol(input[1], &checkLen, 10);
+			const long newStatus = strtol(input[1], &checkLen, 10);
 			if (checkLen == input[1]) {
 				write(STDERR_FILENO, "invalid argument\n", 17);
 				return 2;
@@ -170,9 +170,10 @@ skip:;		write(STDOUT_FILENO, printStat + digit, 3 - digit);
 				}
 			}
 		}
-		if (input[1] == NULL)
+		if (input[1] == NULL) {
 			*status = 1;
 			return 2;
+		}
 	}
 	return 0;
 }

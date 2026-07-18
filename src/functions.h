@@ -22,5 +22,5 @@ typedef struct {
 	struct termios *modes;
 	pid_t *stoppedPID;
 } pid_list;
-int parseBuiltins(char *input[], char *status, pid_list *list);
+int parseBuiltins(char *input[], unsigned char *status, pid_list *list);
 #endif
