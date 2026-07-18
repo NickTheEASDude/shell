@@ -1,6 +1,8 @@
 configure
 config.guess
 config.sub
+config.log
+config.status
 Makefile
 Makefile.in
 autom4te.cache/
@@ -17,3 +19,4 @@ stamp-h1
 .libs/
 .deps/
 *~
+*.o
