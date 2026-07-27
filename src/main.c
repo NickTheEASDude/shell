@@ -49,10 +49,11 @@ int main() {
 				free(command);
 				write(STDOUT_FILENO, "\n", 1);
 				return currentStatus;
+			} else {
+				write(STDERR_FILENO, "getline somehow failed, trying again\n", 37);
+				currentStatus = 1;
+				continue;
 			}
-			write(STDERR_FILENO, "getline somehow failed, trying again\n", 34);
-			currentStatus = 1;
-			continue;
 		}
 		if (command[bytesRead - 1] == '\n')
 			command[bytesRead - 1] = '\0';
