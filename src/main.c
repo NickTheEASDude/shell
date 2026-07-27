@@ -12,6 +12,7 @@ You should have received a copy of the GNU General Public License along with thi
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
+#include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <stdlib.h>
@@ -20,6 +21,11 @@ You should have received a copy of the GNU General Public License along with thi
 #include "functions.h"
 static struct termios parentTmodes;
 static pid_t childStoppedPID = 0;
+
+static void freeArgs(char **args) {
+	for (int i = 0; args[i] != NULL; i++) free(args[i]);
+	free(args);
+}
 
 int main() {
 	pid_t parentPID = getpid();
@@ -37,15 +43,18 @@ int main() {
 		setSignals(SIG_IGN);
 		tcsetattr(STDIN_FILENO, TCSADRAIN, &parentTmodes);
 		write(STDOUT_FILENO, "# ", 2);
-		char command[4097];
-		ssize_t bytesRead = read(STDIN_FILENO, command, 4096);
+		char *command = NULL;
+		size_t lineSize = 0;
+		ssize_t bytesRead = getline(&command, &lineSize, stdin);
 		if (bytesRead < 0) {
-			write(STDERR_FILENO, "read somehow failed, trying again\n", 34);
+			if (feof(stdin)) {
+				free(command);
+				return currentStatus;
+			}
+			write(STDERR_FILENO, "getline somehow failed, trying again\n", 34);
 			currentStatus = 1;
 			continue;
 		}
-		if (bytesRead == 0)
-			return currentStatus;
 		if (command[bytesRead - 1] == '\n')
 			command[bytesRead - 1] = '\0';
 		else
@@ -53,6 +62,7 @@ int main() {
 		if (command[0] == '\0')
 			continue;
 		char **parsedCmd = parseArgs(command);
+		free(command);
 		if (parsedCmd == NULL) {
 			write(STDERR_FILENO, "one of the allocs failed\n", 25);
 			return 3;
@@ -65,7 +75,7 @@ int main() {
 		};
 		int checkCont = parseBuiltins(parsedCmd, &currentStatus, &list);
 		if (checkCont != 0) {
-			free(parsedCmd);
+			freeArgs(parsedCmd);
 			if (checkCont == 1)
 				return currentStatus;
 			continue;
@@ -73,19 +83,19 @@ int main() {
 		pid_t childPID = fork();
 		if (childPID < 0) {
 			write(STDERR_FILENO, "the fork failed lol\n", 20);
-			free(parsedCmd);
+			freeArgs(parsedCmd);
 			return 1;
 		} else if (childPID > 0) {
 			setpgid(childPID, childPID);
 			tcsetpgrp(STDIN_FILENO, childPID);
 			doWait(childPID, parentPID, NULL, &childStoppedPID, &currentStatus);
-			free(parsedCmd);
+			freeArgs(parsedCmd);
 		} else {
 			setSignals(SIG_DFL);
 			setpgid(0, 0);
 			execvp(parsedCmd[0], parsedCmd);
 			write(STDERR_FILENO, "it no exist\n", 12);
-			free(parsedCmd);
+			freeArgs(parsedCmd);
 			_exit(1);
 		}
 	}

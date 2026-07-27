@@ -23,6 +23,7 @@ You should have received a copy of the GNU General Public License along with thi
 static void arrRem(char *arr[], int index) {
 	int size = 0;
 	while (arr[size] != NULL) size++;
+	free(arr[index]);
 	for (int nextIn = index; nextIn < size; nextIn++) {
 		arr[nextIn] = arr[nextIn + 1];
 	}
@@ -53,6 +54,10 @@ void doWait(pid_t child, pid_t parent, struct termios *modes, pid_t *stoppedPID,
 	}
 }
 
+static void freeArray(char **input, int count) {
+	for (int i = 0; i < count; i++) free(input[i]);
+	free(input);
+}
 char **parseArgs(char *input) {
 	char **args = malloc(sizeof(char *));
 	if (args == NULL)
@@ -60,11 +65,17 @@ char **parseArgs(char *input) {
 	int count = 0;
 	char *tokPtr;
 	for (char *token = strtok_r(input, " ", &tokPtr); token != NULL; token = strtok_r(NULL, " ", &tokPtr)) {
-		args[count] = token;
+		char *tokenCopy = strdup(token);
+		if (tokenCopy == NULL) {
+			freeArray(args, count);
+			return NULL;
+		}
+		args[count] = tokenCopy;
 		count++;
 		char **allocCheck = realloc(args, (count + 1) * sizeof(char *));
 		if (allocCheck == NULL) {
-			free(args);
+			free(tokenCopy);
+			freeArray(args, count - 1);
 			return NULL;
 		}
 		args = allocCheck;
