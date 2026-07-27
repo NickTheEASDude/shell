@@ -1,3 +1,2 @@
-Usually just running the configure script, then running make will do the trick.
-If the configure script doesn't exist, you'll need the autotools to generate it.
-Install the autotools, then run autoreconf -if
+This project requires meson and ninja to build (autotools support has since been removed).
+Just run meson setup build, then ninja -C build, and you should be good to go.
