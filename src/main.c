@@ -49,6 +49,7 @@ int main() {
 		if (bytesRead < 0) {
 			if (feof(stdin)) {
 				free(command);
+				write(STDOUT_FILENO, "\n", 1);
 				return currentStatus;
 			}
 			write(STDERR_FILENO, "getline somehow failed, trying again\n", 34);

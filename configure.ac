@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.73])
-AC_INIT([shell], [1.7])
+AC_INIT([shell], [1.7.1])
 AM_INIT_AUTOMAKE([foreign silent-rules])
 AM_SILENT_RULES([yes])
 AC_CONFIG_SRCDIR([src/main.c])
