@@ -2,7 +2,7 @@ project('shell', 'c',
         version: '1.7.1',
         meson_version: '>= 1.3.0',
 	default_options: [
-		'c_std=c17'
+		'c_std=gnu17'
 	]
 )
 cc = meson.get_compiler('c')
